@@ -1,6 +1,5 @@
 from django.contrib.auth import get_user_model
 from django.test import Client, TestCase
-
 from django.urls import reverse
 
 from notes.models import Note
@@ -26,11 +25,10 @@ class TestNoteBase(TestCase):
         """Создание транзакций для временой базы данных."""
         cls.author = User.objects.create(username='Автор')
         cls.another = User.objects.create(username='Автор 2')
-        author_client = Client()
-        author_client.force_login(cls.author)
-        another_client = Client()
-        another_client.force_login(cls.another)
-        cls.user = (author_client, another_client)
+        cls.author_client = Client()
+        cls.author_client.force_login(cls.author)
+        cls.another_client = Client()
+        cls.another_client.force_login(cls.another)
         cls.note = Note.objects.create(
             title=cls.NOTE_TITLE,
             text=cls.NOTE_TEXT,

@@ -86,6 +86,7 @@ def test_user_cant_edit_comment_of_another_user(
     """Проверка редактирования чужого комментария."""
     response = reader_client.post(news_edit_url, data=NEW_COMMENT)
     assert response.status_code == HTTPStatus.NOT_FOUND
-    comment = Comment.objects.get(id=comment.id)
-    assert comment.text != NEW_COMMENT['text']
-    assert comment.author != reader
+    comment_from_db = Comment.objects.get(id=comment.id)
+    assert comment.text == comment_from_db.text
+    assert comment.author == comment_from_db.author
+    assert comment.news == comment_from_db.news

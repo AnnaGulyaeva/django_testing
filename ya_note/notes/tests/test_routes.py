@@ -1,12 +1,12 @@
 from http import HTTPStatus
 
-from .fixtures import TestNoteBase
+from django.contrib.auth import get_user
+
+from notes.tests.fixtures import TestNoteBase
 
 
 class TestRoutes(TestNoteBase):
     """Тесты для проверки маршрутов."""
-
-    ...
 
     def test_pages_availability_for_anonymous_client(self):
         """Проверка доступности страниц для анонимного пользователя.
@@ -38,7 +38,7 @@ class TestRoutes(TestNoteBase):
         )
         for url in urls:
             with self.subTest(url=url):
-                response = self.user[0].get(url)
+                response = self.author_client.get(url)
                 self.assertEqual(response.status_code, HTTPStatus.OK)
 
     def test_availability_for_note_detail_edit_and_delete(self):
@@ -53,12 +53,12 @@ class TestRoutes(TestNoteBase):
             self.delete_url
         )
         users_statuses = (
-            (self.user[0], HTTPStatus.OK),
-            (self.user[1], HTTPStatus.NOT_FOUND),
+            (self.author_client, HTTPStatus.OK),
+            (self.another_client, HTTPStatus.NOT_FOUND),
         )
         for user, status in users_statuses:
             for url in urls:
-                with self.subTest(url=url, user=user, status=status):
+                with self.subTest(url=url, user=get_user(user), status=status):
                     response = user.get(url)
                     self.assertEqual(response.status_code, status)
 

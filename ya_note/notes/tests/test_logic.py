@@ -2,9 +2,9 @@ from http import HTTPStatus
 
 from pytils.translit import slugify
 
-from .fixtures import TestNoteBase
 from notes.forms import WARNING
 from notes.models import Note
+from notes.tests.fixtures import TestNoteBase
 
 
 class TestNoteCreationSlug(TestNoteBase):
@@ -27,7 +27,7 @@ class TestNoteCreationSlug(TestNoteBase):
     def test_user_can_create_note(self):
         """Проверка создания записи авторизованным пользователем."""
         notes_count = Note.objects.count()
-        response = self.user[0].post(self.ADD_URL, data=self.form_data)
+        response = self.author_client.post(self.ADD_URL, data=self.form_data)
         self.assertRedirects(response, self.SUCCESS_URL)
         self.assertEqual(Note.objects.count(), notes_count + 1)
         note = Note.objects.last()
@@ -49,7 +49,7 @@ class TestNoteCreationSlug(TestNoteBase):
         """Проверка создания двух заметок с одинаковым slug."""
         self.form_data['slug'] = self.note.slug
         note_count = Note.objects.count()
-        response = self.user[0].post(self.ADD_URL, data=self.form_data)
+        response = self.author_client.post(self.ADD_URL, data=self.form_data)
         self.assertFormError(
             response,
             form='form',
@@ -77,7 +77,7 @@ class TestNoteEditDeleteSlug(TestNoteBase):
     def test_empty_slug(self):
         """Проверка создания пустого slug."""
         note_count = Note.objects.count()
-        response = self.user[0].post(self.ADD_URL, data=self.form_data)
+        response = self.author_client.post(self.ADD_URL, data=self.form_data)
         self.assertRedirects(response, self.SUCCESS_URL)
         self.assertEqual(Note.objects.count(), note_count + 1)
         new_note = Note.objects.last()
@@ -86,7 +86,7 @@ class TestNoteEditDeleteSlug(TestNoteBase):
 
     def test_author_can_edit_note(self):
         """Проверка редактирования заметки авторизованным пользователем."""
-        response = self.user[0].post(self.edit_url, data=self.form_data)
+        response = self.author_client.post(self.edit_url, data=self.form_data)
         self.assertRedirects(response, self.SUCCESS_URL)
         self.note.refresh_from_db()
         self.assertEqual(self.note.title, self.form_data['title'])
@@ -95,7 +95,7 @@ class TestNoteEditDeleteSlug(TestNoteBase):
 
     def test_other_user_cant_edit_note(self):
         """Проверка редактирования аутентифицированным пользователем."""
-        response = self.user[1].post(self.edit_url, data=self.form_data)
+        response = self.another_client.post(self.edit_url, data=self.form_data)
         self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)
         note_from_db = Note.objects.get(id=self.note.id)
         self.assertEqual(self.note.title, note_from_db.title)
@@ -105,13 +105,13 @@ class TestNoteEditDeleteSlug(TestNoteBase):
     def test_author_can_delete_note(self):
         """Проверка удаления заметки авторизованным пользователем."""
         comments_count = Note.objects.count()
-        response = self.user[0].delete(self.delete_url)
+        response = self.author_client.delete(self.delete_url)
         self.assertRedirects(response, self.SUCCESS_URL)
         self.assertEqual(Note.objects.count(), comments_count - 1)
 
     def test_other_user_cant_delete_note(self):
         """Проверка удаления заметки аутентифицированным пользователем."""
         note_count = Note.objects.count()
-        response = self.user[1].delete(self.delete_url)
+        response = self.another_client.delete(self.delete_url)
         self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)
         self.assertEqual(Note.objects.count(), note_count)

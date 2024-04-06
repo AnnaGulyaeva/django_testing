@@ -1,5 +1,7 @@
-from .fixtures import TestNoteBase
+from django.contrib.auth import get_user
+
 from notes.forms import NoteForm
+from notes.tests.fixtures import TestNoteBase
 
 
 class TestFormNote(TestNoteBase):
@@ -10,11 +12,11 @@ class TestFormNote(TestNoteBase):
     def test_notes_list_for_different_users(self):
         """Проверка списка заметок для любого пользователя."""
         users_notes_in_list = (
-            (self.user[0], True),
-            (self.user[1], False),
+            (self.author_client, True),
+            (self.another_client, False),
         )
         for user, notes_in_list in users_notes_in_list:
-            with self.subTest(user=user):
+            with self.subTest(user=get_user(user)):
                 response = user.get(self.LIST_URL)
                 self.assertIs(
                     self.note in response.context['object_list'], notes_in_list
@@ -24,6 +26,6 @@ class TestFormNote(TestNoteBase):
         """Проверка форм для авторизованного пользователя."""
         for url in (self.edit_url, self.ADD_URL):
             with self.subTest(url=url):
-                response = self.user[0].get(url)
+                response = self.author_client.get(url)
                 self.assertIn('form', response.context)
                 self.assertIsInstance(response.context['form'], NoteForm)

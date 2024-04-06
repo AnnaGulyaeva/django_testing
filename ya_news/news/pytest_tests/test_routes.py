@@ -2,6 +2,7 @@ from http import HTTPStatus
 
 import pytest
 from pytest_django.asserts import assertRedirects
+from pytest_lazyfixture import lazy_fixture as lf
 
 
 @pytest.mark.django_db
@@ -9,48 +10,48 @@ from pytest_django.asserts import assertRedirects
     'reverse_url, parametrized_client, status',
     (
         (
-            pytest.lazy_fixture('news_home_url'),
-            pytest.lazy_fixture('client'),
+            lf('news_home_url'),
+            lf('client'),
             HTTPStatus.OK
         ),
         (
-            pytest.lazy_fixture('news_detail_url'),
-            pytest.lazy_fixture('client'),
+            lf('news_detail_url'),
+            lf('client'),
             HTTPStatus.OK
         ),
         (
-            pytest.lazy_fixture('users_login_url'),
-            pytest.lazy_fixture('client'),
+            lf('users_login_url'),
+            lf('client'),
             HTTPStatus.OK
         ),
         (
-            pytest.lazy_fixture('users_logout_url'),
-            pytest.lazy_fixture('client'),
+            lf('users_logout_url'),
+            lf('client'),
             HTTPStatus.OK
         ),
         (
-            pytest.lazy_fixture('users_signup_url'),
-            pytest.lazy_fixture('client'),
+            lf('users_signup_url'),
+            lf('client'),
             HTTPStatus.OK
         ),
         (
-            pytest.lazy_fixture('news_edit_url'),
-            pytest.lazy_fixture('author_client'),
+            lf('news_edit_url'),
+            lf('author_client'),
             HTTPStatus.OK
         ),
         (
-            pytest.lazy_fixture('news_edit_url'),
-            pytest.lazy_fixture('reader_client'),
+            lf('news_edit_url'),
+            lf('reader_client'),
             HTTPStatus.NOT_FOUND
         ),
         (
-            pytest.lazy_fixture('news_delete_url'),
-            pytest.lazy_fixture('author_client'),
+            lf('news_delete_url'),
+            lf('author_client'),
             HTTPStatus.OK
         ),
         (
-            pytest.lazy_fixture('news_delete_url'),
-            pytest.lazy_fixture('reader_client'),
+            lf('news_delete_url'),
+            lf('reader_client'),
             HTTPStatus.NOT_FOUND
         ),
     )
@@ -66,8 +67,8 @@ def test_availability_for_comment_edit_and_delete(
 @pytest.mark.parametrize(
     'reverse_url',
     (
-        pytest.lazy_fixture('news_edit_url'),
-        pytest.lazy_fixture('news_delete_url')
+        lf('news_edit_url'),
+        lf('news_delete_url')
     )
 )
 def test_redirect_for_anonymous_client(client, users_login_url, reverse_url):
